@@ -136,5 +136,21 @@ export const businesses: Business[] = [
     discount: 20,
     description: 'Tradizione e storia',
     image: '/placeholder.svg'
-  }	
+  },
+  {
+    id: '18',
+    name: 'Scavi di Pompei',
+    category: 'Scavi Archeologici',
+    discount: 15,
+    description: 'Visita agli scavi archeologici di Pompei',
+    image: '/placeholder.svg'
+  },
+  {
+    id: '19',
+    name: 'Scavi di Ercolano',
+    category: 'Scavi Archeologici',
+    discount: 10,
+    description: 'Esplora gli scavi archeologici di Ercolano',
+    image: '/placeholder.svg'
+  }
 ];
