@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,20 +10,20 @@ const Plans = () => {
     {
       name: 'Base',
       limit: 5,
-      price: '€9.99',
+      price: 'free',
       features: ['Fino a 5 sconti attivabili', 'Accesso a tutte le categorie', 'Supporto base']
     },
     {
       name: 'Medium',
       limit: 8,
-      price: '€14.99',
+      price: '€9.99',
       features: ['Fino a 8 sconti attivabili', 'Accesso prioritario', 'Supporto dedicato']
     },
     {
       name: 'Premium',
       limit: 15,
-      price: '€24.99',
-      features: ['Fino a 15 sconti attivabili', 'Accesso VIP', 'Supporto 24/7', 'Offerte esclusive']
+      price: '€19.99',
+      features: ['Fino a 15 sconti attivabili', 'Accesso VIP',  'Offerte esclusive']
     }
   ];
 
@@ -49,7 +48,7 @@ const Plans = () => {
               <CardHeader>
                 <h3 className="text-2xl font-bold text-center">{plan.name}</h3>
                 <p className="text-3xl font-bold text-center text-primary">{plan.price}</p>
-                <p className="text-sm text-center text-muted-foreground">al mese</p>
+                <p className="text-sm text-center text-muted-foreground">annuo</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="space-y-2">

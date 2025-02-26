@@ -1,4 +1,3 @@
-
 import { Business } from '../types/business';
 import { cn } from '@/lib/utils';
 import { Check, Percent } from 'lucide-react';
