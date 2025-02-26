@@ -17,14 +17,17 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedCount, setSelectedCount] = useState<number>(0);
   const [planLimit, setPlanLimit] = useState<number>(5);
+  const [currentPlan, setCurrentPlan] = useState<string>('base');
 
   useEffect(() => {
     const limit = localStorage.getItem('selectedPlanLimit');
+    const plan = localStorage.getItem('selectedPlan');
     if (!limit) {
       navigate('/');
       return;
     }
     setPlanLimit(Number(limit));
+    setCurrentPlan(plan || 'base');
   }, [navigate]);
 
   const categories = ['all', ...new Set(businesses.map(b => b.category))];
@@ -34,7 +37,21 @@ const Index = () => {
 
   const handleSelectionChange = (newCount: number) => {
     if (newCount > planLimit) {
-      toast.error(`Il tuo piano permette di selezionare massimo ${planLimit} sconti`);
+      if (currentPlan === 'premium') {
+        toast.error(`Il tuo piano permette di selezionare massimo ${planLimit} sconti`);
+      } else {
+        const nextPlan = currentPlan === 'base' ? 'medium' : 'premium';
+        const nextPlanLimit = currentPlan === 'base' ? 8 : 15;
+        toast.error(
+          `Hai raggiunto il limite del tuo piano! Passa al piano ${nextPlan} per selezionare fino a ${nextPlanLimit} sconti`,
+          {
+            action: {
+              label: "Upgrade",
+              onClick: () => navigate('/')
+            }
+          }
+        );
+      }
       return false;
     }
     setSelectedCount(newCount);
