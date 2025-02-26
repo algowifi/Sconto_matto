@@ -6,4 +6,5 @@ export interface Business {
   discount: number;
   description: string;
   image: string;
+  selected?: boolean;
 }

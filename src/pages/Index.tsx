@@ -1,6 +1,8 @@
 
 import { businesses } from '../data/businesses';
 import BusinessList from '../components/BusinessList';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -8,18 +10,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from 'react';
+import { toast } from "sonner";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCount, setSelectedCount] = useState<number>(0);
+  const [planLimit, setPlanLimit] = useState<number>(5);
 
-  // Estrai le categorie uniche dalle attività
+  useEffect(() => {
+    const limit = localStorage.getItem('selectedPlanLimit');
+    if (!limit) {
+      navigate('/');
+      return;
+    }
+    setPlanLimit(Number(limit));
+  }, [navigate]);
+
   const categories = ['all', ...new Set(businesses.map(b => b.category))];
-
-  // Filtra le attività in base alla categoria selezionata
   const filteredBusinesses = selectedCategory === 'all' 
     ? businesses 
     : businesses.filter(b => b.category === selectedCategory);
+
+  const handleSelectionChange = (newCount: number) => {
+    if (newCount > planLimit) {
+      toast.error(`Il tuo piano permette di selezionare massimo ${planLimit} sconti`);
+      return false;
+    }
+    setSelectedCount(newCount);
+    return true;
+  };
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -28,6 +48,7 @@ const Index = () => {
           <h1 className="text-4xl font-bold tracking-tight">Offerte Esclusive</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Seleziona le attività che ti interessano per attivare gli sconti esclusivi
+            (max {planLimit} sconti)
           </p>
         </div>
         
@@ -46,7 +67,10 @@ const Index = () => {
           </Select>
         </div>
         
-        <BusinessList businesses={filteredBusinesses} />
+        <BusinessList 
+          businesses={filteredBusinesses} 
+          onSelectionChange={handleSelectionChange}
+        />
       </div>
     </div>
   );
