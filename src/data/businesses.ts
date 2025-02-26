@@ -128,6 +128,13 @@ export const businesses: Business[] = [
     discount: 20,
     description: 'Esposizioni di arte e storia',
     image: '/placeholder.svg'
-  }
-	
+  },
+ {
+    id: '17',
+    name: 'Parco Nazionale del Vesuvio',
+    category: 'Parchi',
+    discount: 20,
+    description: 'Tradizione e storia',
+    image: '/placeholder.svg'
+  }	
 ];
