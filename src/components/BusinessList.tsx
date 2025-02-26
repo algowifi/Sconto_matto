@@ -6,18 +6,25 @@ import { toast } from 'sonner';
 
 interface BusinessListProps {
   businesses: Business[];
+  onSelectionChange: (newCount: number) => boolean;
 }
 
-const BusinessList = ({ businesses }: BusinessListProps) => {
+const BusinessList = ({ businesses, onSelectionChange }: BusinessListProps) => {
   const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>([]);
 
   const handleSelect = (id: string) => {
     setSelectedBusinesses((prev) => {
-      const newSelected = prev.includes(id)
+      const isCurrentlySelected = prev.includes(id);
+      const newSelected = isCurrentlySelected
         ? prev.filter((businessId) => businessId !== id)
         : [...prev, id];
       
-      if (newSelected.includes(id)) {
+      const allowed = onSelectionChange(newSelected.length);
+      if (!allowed) {
+        return prev;
+      }
+      
+      if (!isCurrentlySelected) {
         toast.success('Sconto attivato con successo!');
       }
       
