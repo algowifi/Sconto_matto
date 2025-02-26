@@ -120,5 +120,14 @@ export const businesses: Business[] = [
     discount: 20,
     description: 'Giochi di fuga immersivi e coinvolgenti',
     image: '/placeholder.svg'
+  },
+ {
+    id: '16',
+    name: 'Museo del Mondo',
+    category: 'Musei',
+    discount: 20,
+    description: 'Esposizioni di arte e storia',
+    image: '/placeholder.svg'
   }
+	
 ];
