@@ -17,7 +17,7 @@ import {
 import { businesses } from '@/data/businesses';
 import { saveUserSelectedBusinesses, getUserSelectedBusinesses } from '@/data/users';
 import { Business } from "@/types/business";
-import { LogOut, Percent } from "lucide-react";
+import { LogOut, Percent, User } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -144,6 +144,14 @@ const Index = () => {
           <h1 className="text-3xl font-bold">Offerte Esclusive</h1>
           <Button 
             variant="outline"
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-2"
+          >
+            <User size={18} />
+            Profilo
+          </Button>
+          <Button 
+            variant="outline"
             onClick={handleLogout}
             className="flex items-center gap-2"
           >
@@ -221,8 +229,7 @@ const Index = () => {
               </CardContent>
               <CardFooter className="flex justify-between items-center">
                 <Button 
-                  variant={isBusinessSelected(business.id) ? 'destructive' : 'primary'}
-                  className={isBusinessSelected(business.id) ? '' : 'bg-green-500 hover:bg-green-700 text-white'}
+                  variant={isBusinessSelected(business.id) ? 'destructive' : 'secondary'}
                   onClick={() => handleBusinessSelection(business.id)}
                 >
                   {isBusinessSelected(business.id) ? 'Rimuovi' : 'Attiva'}
@@ -234,7 +241,9 @@ const Index = () => {
             </Card>
           ))}
         </div>
-        <Button onClick={handleViewProfile}>OK</Button>
+        <div className="flex justify-center">
+          <Button onClick={handleViewProfile}>Conferma Offerte</Button>
+        </div>
       </div>
     </div>
   );
