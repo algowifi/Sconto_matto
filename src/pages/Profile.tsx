@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { businesses } from '@/data/businesses';
 import { getUserSelectedBusinesses } from '@/data/users';
 import { Business } from "@/types/business";
-import { LogOut, CreditCard, ArrowRight, Percent } from "lucide-react";
+import { LogOut, CreditCard, ArrowRight, Percent, Trash } from "lucide-react";
 import { toast } from "sonner";
 
 const Profile = () => {
@@ -76,6 +76,21 @@ const Profile = () => {
 
   const handleChangePlan = () => {
     navigate('/plans');
+  };
+
+  const handleRemoveOffer = (businessId: string) => {
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+      navigate('/login');
+      return;
+    }
+
+    const selectedIds = getUserSelectedBusinesses(email);
+    // Rimuovi l'attività se è già selezionata
+    const updatedIds = selectedIds.filter(id => id !== businessId);
+    localStorage.setItem(`selectedBusinesses_${email}`, JSON.stringify(updatedIds));
+    setSelectedBusinesses(prev => prev.filter(b => b.id !== businessId));
+    toast.success('Offerta rimossa con successo!');
   };
 
   return (
@@ -193,6 +208,16 @@ const Profile = () => {
                     <p className="text-sm text-muted-foreground">{business.category}</p>
                     <p className="text-sm mt-2 line-clamp-2">{business.description}</p>
                   </CardContent>
+                  <CardFooter className="flex justify-between items-center">
+                    <Button 
+                      variant="destructive"
+                      onClick={() => handleRemoveOffer(business.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <Trash size={16} />
+                      Rimuovi
+                    </Button>
+                  </CardFooter>
                 </Card>
               ))}
             </div>

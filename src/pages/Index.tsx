@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -24,7 +23,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [discountRange, setDiscountRange] = useState<number[]>([0, 100]);
+  const [discountRange, setDiscountRange] = useState<number[]>([10, 20]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBusinesses, setSelectedBusinesses] = useState<Business[]>([]);
   const [userName, setUserName] = useState<string>("");
@@ -171,20 +170,7 @@ const Index = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div>
-                  <Label>Sconto</Label>
-                  <div className="flex items-center space-x-2">
-                    <p>{discountRange[0]}%</p>
-                    <Progress value={discountRange[1]} max={100} className="flex-1" />
-                    <p>{discountRange[1]}%</p>
-                  </div>
-                  <Slider
-                    defaultValue={discountRange}
-                    max={100}
-                    step={1}
-                    onValueChange={(value) => setDiscountRange(value)}
-                  />
-                </div>
+                
               </div>
               <div>
                 <Accordion type="multiple" collapsible>
