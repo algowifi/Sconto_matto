@@ -1,15 +1,22 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Business } from '../types/business';
 import BusinessCard from './BusinessCard';
 import { toast } from 'sonner';
 
 interface BusinessListProps {
   businesses: Business[];
-  onSelectionChange: (newCount: number) => boolean;
+  onSelectionChange: (newCount: number, selectedIds: string[]) => boolean;
+  initialSelectedIds: string[];
 }
 
-const BusinessList = ({ businesses, onSelectionChange }: BusinessListProps) => {
-  const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>([]);
+const BusinessList = ({ businesses, onSelectionChange, initialSelectedIds }: BusinessListProps) => {
+  const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>(initialSelectedIds || []);
+
+  // Assicuriamoci che lo stato si aggiorni quando cambiano gli initialSelectedIds
+  useEffect(() => {
+    setSelectedBusinesses(initialSelectedIds || []);
+  }, [initialSelectedIds]);
 
   const handleSelect = (id: string) => {
     setSelectedBusinesses((prev) => {
@@ -18,7 +25,7 @@ const BusinessList = ({ businesses, onSelectionChange }: BusinessListProps) => {
         ? prev.filter((businessId) => businessId !== id)
         : [...prev, id];
       
-      const allowed = onSelectionChange(newSelected.length);
+      const allowed = onSelectionChange(newSelected.length, newSelected);
       if (!allowed) {
         return prev;
       }

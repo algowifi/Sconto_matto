@@ -1,7 +1,9 @@
+
 import { Business } from '../types/business';
 import { cn } from '@/lib/utils';
 import { Check, Percent } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useState } from 'react';
 
 interface BusinessCardProps {
   business: Business;
@@ -10,6 +12,12 @@ interface BusinessCardProps {
 }
 
 const BusinessCard = ({ business, isSelected, onSelect }: BusinessCardProps) => {
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <Card
       className={cn(
@@ -30,9 +38,10 @@ const BusinessCard = ({ business, isSelected, onSelect }: BusinessCardProps) => 
       <div className="space-y-4">
         <div className="aspect-square relative rounded-lg overflow-hidden bg-muted">
           <img
-            src={business.image}
+            src={imageError ? '/placeholder.svg' : business.image}
             alt={business.name}
             className="object-cover w-full h-full"
+            onError={handleImageError}
           />
         </div>
         

@@ -23,6 +23,8 @@ const Index = () => {
   const [currentPlan, setCurrentPlan] = useState<string>('base');
   const [userEmail, setUserEmail] = useState<string>('');
   const [initialSelectedIds, setInitialSelectedIds] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>(['all']);
+  const [localBusinesses, setLocalBusinesses] = useState(businesses);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -51,12 +53,22 @@ const Index = () => {
     const selectedBusinessIds = getUserSelectedBusinesses(email);
     setInitialSelectedIds(selectedBusinessIds);
     setSelectedCount(selectedBusinessIds.length);
+
+    // Aggiorna l'elenco delle categorie dinamicamente dalle attività
+    const uniqueCategories = ['all', ...new Set(businesses.map(b => b.category))];
+    setCategories(uniqueCategories);
+
+    // Prepara i business con immagini reali o placeholder
+    const processedBusinesses = businesses.map(business => ({
+      ...business,
+      image: business.image || '/placeholder.svg'
+    }));
+    setLocalBusinesses(processedBusinesses);
   }, [navigate]);
 
-  const categories = ['all', ...new Set(businesses.map(b => b.category))];
   const filteredBusinesses = selectedCategory === 'all' 
-    ? businesses 
-    : businesses.filter(b => b.category === selectedCategory);
+    ? localBusinesses 
+    : localBusinesses.filter(b => b.category === selectedCategory);
 
   // Assegna lo stato 'selected' alle attività già selezionate dall'utente
   const businessesWithSelection = filteredBusinesses.map(b => ({
@@ -104,6 +116,10 @@ const Index = () => {
     navigate('/login');
   };
 
+  const handleGoToProfile = () => {
+    navigate('/profile');
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -115,14 +131,23 @@ const Index = () => {
               (max {planLimit} sconti)
             </p>
           </div>
-          <Button 
-            variant="outline"
-            onClick={handleLogout}
-            className="flex items-center gap-2"
-          >
-            <LogOut size={18} />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="secondary"
+              onClick={handleGoToProfile}
+              className="flex items-center gap-2"
+            >
+              Il Mio Profilo
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut size={18} />
+              Logout
+            </Button>
+          </div>
         </div>
         
         <div className="w-full max-w-xs mx-auto">
