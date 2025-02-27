@@ -9,15 +9,28 @@ import Plans from "./pages/Plans";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 
 const queryClient = new QueryClient();
 
-// Componente per le rotte protette
+// Componente per le rotte protette (utenti)
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+// Componente per le rotte protette dell'amministratore
+const AdminProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const isAdminAuthenticated = localStorage.getItem("isAdminAuthenticated") === "true";
+  
+  if (!isAdminAuthenticated) {
+    return <Navigate to="/admin-login" replace />;
   }
   
   return children;
@@ -45,6 +58,15 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route 
+              path="/admin" 
+              element={
+                <AdminProtectedRoute>
+                  <Admin />
+                </AdminProtectedRoute>
+              } 
+            />
             <Route 
               path="/" 
               element={
