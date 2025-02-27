@@ -1,3 +1,4 @@
+
 import { businesses } from '../data/businesses';
 import BusinessList from '../components/BusinessList';
 import { useEffect, useState } from 'react';
@@ -10,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -57,15 +60,35 @@ const Index = () => {
     return true;
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('selectedPlan');
+    localStorage.removeItem('selectedPlanLimit');
+    toast.success('Logout effettuato con successo');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Offerte Esclusive</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Seleziona le attività che ti interessano per attivare gli sconti esclusivi
-            (max {planLimit} sconti)
-          </p>
+        <div className="flex justify-between items-center">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight">Offerte Esclusive</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Seleziona le attività che ti interessano per attivare gli sconti esclusivi
+              (max {planLimit} sconti)
+            </p>
+          </div>
+          <Button 
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut size={18} />
+            Logout
+          </Button>
         </div>
         
         <div className="w-full max-w-xs mx-auto">
