@@ -4,12 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-
-// Credenziali hardcoded per semplicità - in un'applicazione reale usare backend
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { verifyAdminCredentials, updateAdminLastLogin } from "@/data/users";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -18,49 +15,63 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simuliamo un ritardo di rete
-    setTimeout(() => {
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    try {
+      // Verifica delle credenziali utilizzando la funzione dal modulo users.ts
+      const isValid = verifyAdminCredentials(username, password);
+
+      if (isValid) {
+        // Aggiorna l'ultima data di accesso
+        updateAdminLastLogin(username);
+        
+        // Imposta il flag di autenticazione
         localStorage.setItem("isAdminAuthenticated", "true");
+        
         toast({
-          title: "Accesso riuscito",
-          description: "Benvenuto nella dashboard amministrativa",
+          title: "Accesso effettuato",
+          description: "Benvenuto nella dashboard amministrativa.",
         });
+        
         navigate("/admin");
       } else {
         toast({
-          title: "Accesso fallito",
-          description: "Username o password non validi",
+          title: "Errore di accesso",
+          description: "Username o password non validi.",
           variant: "destructive",
         });
       }
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'accesso.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Dashboard Admin</CardTitle>
-          <CardDescription className="text-center">
-            Inserisci le credenziali per accedere alla dashboard amministrativa
+          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <CardDescription>
+            Inserisci le tue credenziali per accedere alla dashboard
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
-                type="text"
+                placeholder="admin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
                 required
               />
             </div>
@@ -71,13 +82,12 @@ const AdminLogin = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
                 required
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading ? "Accesso in corso..." : "Accedi"}
             </Button>
           </CardFooter>

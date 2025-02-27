@@ -7,43 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Edit2, UserX, UserPlus } from "lucide-react";
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  plan: string;
-  isActive: boolean;
-  registeredDate: string;
-}
-
-// Utenti di esempio
-const mockUsers: User[] = [
-  {
-    id: "1",
-    username: "mario_rossi",
-    email: "mario@example.com",
-    plan: "Base",
-    isActive: true,
-    registeredDate: "2023-08-15",
-  },
-  {
-    id: "2",
-    username: "giulia_bianchi",
-    email: "giulia@example.com",
-    plan: "Premium",
-    isActive: true,
-    registeredDate: "2023-10-22",
-  },
-  {
-    id: "3",
-    username: "roberto_verdi",
-    email: "roberto@example.com",
-    plan: "Medium",
-    isActive: false,
-    registeredDate: "2023-11-30",
-  },
-];
+import { User, getUsers, saveUsers } from "@/data/users";
 
 const UsersManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -58,19 +22,13 @@ const UsersManagement = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // In un'app reale, qui faremmo una chiamata API
-    const savedUsers = localStorage.getItem("admin_users");
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    } else {
-      setUsers(mockUsers);
-      localStorage.setItem("admin_users", JSON.stringify(mockUsers));
-    }
+    // Carica i dati degli utenti dal modulo data/users.ts
+    setUsers(getUsers());
   }, []);
 
-  const saveUsers = (updatedUsers: User[]) => {
+  const handleSaveUsers = (updatedUsers: User[]) => {
     setUsers(updatedUsers);
-    localStorage.setItem("admin_users", JSON.stringify(updatedUsers));
+    saveUsers(updatedUsers);
   };
 
   const handleAddUser = () => {
@@ -82,7 +40,7 @@ const UsersManagement = () => {
     };
     
     const updatedUsers = [...users, newUserComplete];
-    saveUsers(updatedUsers);
+    handleSaveUsers(updatedUsers);
     
     setIsAdding(false);
     setNewUser({
@@ -105,7 +63,7 @@ const UsersManagement = () => {
       user.id === editingUser.id ? editingUser : user
     );
     
-    saveUsers(updatedUsers);
+    handleSaveUsers(updatedUsers);
     setEditingUser(null);
     
     toast({
@@ -119,7 +77,7 @@ const UsersManagement = () => {
       user.id === id ? { ...user, isActive: !user.isActive } : user
     );
     
-    saveUsers(updatedUsers);
+    handleSaveUsers(updatedUsers);
     
     const user = updatedUsers.find((u) => u.id === id);
     
