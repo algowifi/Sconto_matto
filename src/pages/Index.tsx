@@ -1,4 +1,3 @@
-
 import { businesses } from '../data/businesses';
 import BusinessList from '../components/BusinessList';
 import { useEffect, useState } from 'react';

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Business } from '../types/business';
 import BusinessCard from './BusinessCard';
