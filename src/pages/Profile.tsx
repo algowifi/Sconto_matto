@@ -54,10 +54,11 @@ const Profile = () => {
     setSelectedBusinesses(selectedBusiness);
 
     // Calcola il risparmio totale (come esempio)
-    const savings = selectedBusiness.reduce((total, business) => 
-      total + business.discount, 0
-    );
-    setTotalSavings(savings);
+    const totalDiscount = selectedBusiness.reduce((total, business) => total + business.discount, 0);
+
+    // Calcola la percentuale di risparmio corretta
+    const percentageSavings = selectedBusinesses.length > 0 ? Math.round(totalDiscount / selectedBusinesses.length) : 0;
+    setTotalSavings(percentageSavings);
   }, [navigate]);
 
   const handleLogout = () => {
