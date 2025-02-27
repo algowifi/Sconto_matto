@@ -22,7 +22,7 @@ export const mockUsers: User[] = [
     id: "1",
     username: "mario_rossi",
     email: "mario@example.com",
-    plan: "Base",
+    plan: "Medium",
     isActive: true,
     registeredDate: "2023-08-15",
     selectedBusinessIds: []
