@@ -4,130 +4,105 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { LogIn, UserPlus } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { verifyUserCredentials } from "@/data/users"; // Importiamo la funzione corretta
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validazione base
-    if (!email || !password || (!isLogin && !name)) {
-      toast.error("Per favore compila tutti i campi");
-      return;
-    }
+    setIsLoading(true);
 
-    // In un'app reale, qui ci sarebbe l'autenticazione con un backend
-    // Per questo esempio, simuliamo un login/registrazione di successo
-    if (isLogin) {
-      // Simula login
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", email);
-      toast.success("Login effettuato con successo!");
-    } else {
-      // Simula registrazione
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("userName", name);
-      toast.success("Registrazione completata con successo!");
-    }
-    
-    // Reindirizza alla pagina dei piani
-    navigate("/");
-  };
+    try {
+      // Verifica delle credenziali dell'utente
+      const user = verifyUserCredentials(email, password);
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    // Reset dei campi quando si cambia modalità
-    setEmail("");
-    setPassword("");
-    setName("");
+      if (user) {
+        // Imposta il flag di autenticazione e i dati dell'utente
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("userName", user.username);
+        localStorage.setItem("selectedPlan", user.plan.toLowerCase());
+        
+        // Imposta i limiti del piano in base al piano dell'utente
+        if (user.plan === "Base") {
+          localStorage.setItem("selectedPlanLimit", "5");
+        } else if (user.plan === "Medium") {
+          localStorage.setItem("selectedPlanLimit", "8");
+        } else if (user.plan === "Premium") {
+          localStorage.setItem("selectedPlanLimit", "15");
+        }
+        
+        toast({
+          title: "Accesso effettuato",
+          description: `Benvenuto, ${user.username}!`,
+        });
+        
+        navigate("/businesses");
+      } else {
+        toast({
+          title: "Errore di accesso",
+          description: "Email o password non validi.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'accesso.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
-        <div className="p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {isLogin ? "Accedi" : "Registrati"}
-            </h1>
-            <p className="text-gray-600 mt-2">
-              {isLogin
-                ? "Accedi per vedere le offerte esclusive"
-                : "Crea un account per accedere alle offerte"}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Il tuo nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-            )}
-
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Accedi al tuo account</CardTitle>
+          <CardDescription>
+            Inserisci le tue credenziali per accedere
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleLogin}>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="La tua email"
+                placeholder="mario@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="La tua password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
-
-            <Button type="submit" className="w-full" size="lg">
-              {isLogin ? (
-                <>
-                  <LogIn className="mr-2" size={18} />
-                  Accedi
-                </>
-              ) : (
-                <>
-                  <UserPlus className="mr-2" size={18} />
-                  Registrati
-                </>
-              )}
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? "Accesso in corso..." : "Accedi"}
             </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <button
-              onClick={toggleMode}
-              className="text-sm text-blue-600 hover:underline font-medium"
-            >
-              {isLogin
-                ? "Non hai un account? Registrati"
-                : "Hai già un account? Accedi"}
-            </button>
-          </div>
-        </div>
-      </div>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   );
 };

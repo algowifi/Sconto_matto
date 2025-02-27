@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { getUserSelectedBusinesses, saveUserSelectedBusinesses } from '@/data/users';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -20,8 +21,23 @@ const Index = () => {
   const [selectedCount, setSelectedCount] = useState<number>(0);
   const [planLimit, setPlanLimit] = useState<number>(5);
   const [currentPlan, setCurrentPlan] = useState<string>('base');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [initialSelectedIds, setInitialSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+      navigate('/login');
+      return;
+    }
+    setUserEmail(email);
+
     const limit = localStorage.getItem('selectedPlanLimit');
     const plan = localStorage.getItem('selectedPlan');
     if (!limit) {
@@ -30,6 +46,11 @@ const Index = () => {
     }
     setPlanLimit(Number(limit));
     setCurrentPlan(plan || 'base');
+
+    // Carica le attività selezionate dall'utente
+    const selectedBusinessIds = getUserSelectedBusinesses(email);
+    setInitialSelectedIds(selectedBusinessIds);
+    setSelectedCount(selectedBusinessIds.length);
   }, [navigate]);
 
   const categories = ['all', ...new Set(businesses.map(b => b.category))];
@@ -37,7 +58,13 @@ const Index = () => {
     ? businesses 
     : businesses.filter(b => b.category === selectedCategory);
 
-  const handleSelectionChange = (newCount: number) => {
+  // Assegna lo stato 'selected' alle attività già selezionate dall'utente
+  const businessesWithSelection = filteredBusinesses.map(b => ({
+    ...b,
+    selected: initialSelectedIds.includes(b.id)
+  }));
+
+  const handleSelectionChange = (newCount: number, selectedIds: string[]) => {
     if (newCount > planLimit) {
       if (currentPlan === 'premium') {
         toast.error(`Il tuo piano permette di selezionare massimo ${planLimit} sconti`);
@@ -56,7 +83,14 @@ const Index = () => {
       }
       return false;
     }
+    
     setSelectedCount(newCount);
+    
+    // Salva le selezioni dell'utente
+    if (userEmail) {
+      saveUserSelectedBusinesses(userEmail, selectedIds);
+    }
+    
     return true;
   };
 
@@ -107,8 +141,9 @@ const Index = () => {
         </div>
         
         <BusinessList 
-          businesses={filteredBusinesses} 
+          businesses={businessesWithSelection} 
           onSelectionChange={handleSelectionChange}
+          initialSelectedIds={initialSelectedIds}
         />
       </div>
     </div>

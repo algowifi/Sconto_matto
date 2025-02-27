@@ -1,3 +1,4 @@
+
 export interface Business {
   id: string;
   name: string;
@@ -6,4 +7,6 @@ export interface Business {
   description: string;
   image: string;
   selected?: boolean;
+  latitude?: number;
+  longitude?: number;
 }

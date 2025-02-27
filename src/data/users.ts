@@ -6,6 +6,7 @@ export interface User {
   plan: string;
   isActive: boolean;
   registeredDate: string;
+  selectedBusinessIds?: string[]; // Aggiunto per salvare le scelte dell'utente
 }
 
 export interface AdminUser {
@@ -25,6 +26,7 @@ export const mockUsers: User[] = [
     plan: "Base",
     isActive: true,
     registeredDate: "2023-08-15",
+    selectedBusinessIds: []
   },
   {
     id: "2",
@@ -33,6 +35,7 @@ export const mockUsers: User[] = [
     plan: "Premium",
     isActive: true,
     registeredDate: "2023-10-22",
+    selectedBusinessIds: []
   },
   {
     id: "3",
@@ -41,6 +44,7 @@ export const mockUsers: User[] = [
     plan: "Medium",
     isActive: false,
     registeredDate: "2023-11-30",
+    selectedBusinessIds: []
   },
 ];
 
@@ -57,16 +61,16 @@ export const mockAdminUsers: AdminUser[] = [
 
 // Funzioni di utilità per il salvataggio e il recupero dei dati
 export const getUsers = (): User[] => {
-  const savedUsers = localStorage.getItem("admin_users");
+  const savedUsers = localStorage.getItem("users");
   if (savedUsers) {
     return JSON.parse(savedUsers);
   }
-  localStorage.setItem("admin_users", JSON.stringify(mockUsers));
+  localStorage.setItem("users", JSON.stringify(mockUsers));
   return mockUsers;
 };
 
 export const saveUsers = (users: User[]): void => {
-  localStorage.setItem("admin_users", JSON.stringify(users));
+  localStorage.setItem("users", JSON.stringify(users));
 };
 
 export const getAdminUsers = (): AdminUser[] => {
@@ -91,6 +95,14 @@ export const verifyAdminCredentials = (username: string, password: string): bool
   );
 };
 
+export const verifyUserCredentials = (email: string, password: string): User | null => {
+  // In un'implementazione reale, verificheremmo la password in modo sicuro
+  // Per questa demo, accettiamo qualsiasi password per gli utenti esistenti
+  const users = getUsers();
+  const user = users.find(user => user.email === email && user.isActive);
+  return user || null;
+};
+
 export const updateAdminLastLogin = (username: string): void => {
   const adminUsers = getAdminUsers();
   const updatedUsers = adminUsers.map(user => 
@@ -99,4 +111,20 @@ export const updateAdminLastLogin = (username: string): void => {
       : user
   );
   saveAdminUsers(updatedUsers);
+};
+
+export const saveUserSelectedBusinesses = (email: string, selectedBusinessIds: string[]): void => {
+  const users = getUsers();
+  const updatedUsers = users.map(user => 
+    user.email === email 
+      ? { ...user, selectedBusinessIds } 
+      : user
+  );
+  saveUsers(updatedUsers);
+};
+
+export const getUserSelectedBusinesses = (email: string): string[] => {
+  const users = getUsers();
+  const user = users.find(user => user.email === email);
+  return user?.selectedBusinessIds || [];
 };

@@ -7,18 +7,31 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Edit2, Trash2, Plus } from "lucide-react";
 import { businesses } from "@/data/businesses";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import * as Icons from "lucide-react";
 
 interface Category {
   id: string;
   name: string;
   count: number;
+  icon?: string;
 }
+
+// Lista delle icone disponibili da Lucide React
+const availableIcons = [
+  "Store", "ShoppingBag", "Coffee", "Utensils", "Car", "Plane", "Hotel", 
+  "Landmark", "Film", "Music", "Book", "Heart", "Wallet", "Gift", "ShoppingCart", 
+  "Shirt", "Camera", "Bicycle", "TagIcon", "Spa", "UtensilsCrossed", "Wine",
+  "Beer", "Dumbbell", "Globe", "Pizza", "Cake", "IceCream", "Fish", "Leaf",
+  "School", "Gamepad2", "Palette", "Medal", "Trophy", "Bus"
+];
 
 const CategoriesManagement = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryIcon, setNewCategoryIcon] = useState("Store");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,6 +53,7 @@ const CategoriesManagement = () => {
         id: (index + 1).toString(),
         name,
         count,
+        icon: "Store" // Icona predefinita
       })
     );
 
@@ -64,12 +78,14 @@ const CategoriesManagement = () => {
       id: Date.now().toString(),
       name: newCategoryName.trim(),
       count: 0,
+      icon: newCategoryIcon
     };
 
     const updatedCategories = [...categories, newCategory];
     saveCategories(updatedCategories);
     setIsAdding(false);
     setNewCategoryName("");
+    setNewCategoryIcon("Store");
 
     toast({
       title: "Categoria aggiunta",
@@ -89,7 +105,7 @@ const CategoriesManagement = () => {
 
     toast({
       title: "Categoria aggiornata",
-      description: `La categoria è stata rinominata in "${editingCategory.name}"`,
+      description: `La categoria è stata aggiornata con successo`,
     });
   };
 
@@ -115,6 +131,13 @@ const CategoriesManagement = () => {
     });
   };
 
+  // Renderizza l'icona in base al nome
+  const IconComponent = ({ name }: { name: string }) => {
+    // @ts-ignore - Ignoriamo il controllo sui tipi qui
+    const Icon = Icons[name] || Icons.Store;
+    return <Icon className="h-5 w-5" />;
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -137,6 +160,28 @@ const CategoriesManagement = () => {
                   placeholder="Inserisci nome categoria"
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new-category-icon">Icona categoria</Label>
+                <Select
+                  value={newCategoryIcon}
+                  onValueChange={setNewCategoryIcon}
+                >
+                  <SelectTrigger id="new-category-icon" className="flex items-center gap-2">
+                    <IconComponent name={newCategoryIcon} />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {availableIcons.map((icon) => (
+                      <SelectItem key={icon} value={icon} className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <IconComponent name={icon} />
+                          <span>{icon}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={handleAddCategory} disabled={!newCategoryName.trim()}>
@@ -147,6 +192,7 @@ const CategoriesManagement = () => {
                 onClick={() => {
                   setIsAdding(false);
                   setNewCategoryName("");
+                  setNewCategoryIcon("Store");
                 }}
               >
                 Annulla
@@ -172,6 +218,28 @@ const CategoriesManagement = () => {
                   }
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-category-icon">Icona categoria</Label>
+                <Select
+                  value={editingCategory.icon || "Store"}
+                  onValueChange={(icon) => setEditingCategory({...editingCategory, icon})}
+                >
+                  <SelectTrigger id="edit-category-icon" className="flex items-center gap-2">
+                    <IconComponent name={editingCategory.icon || "Store"} />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {availableIcons.map((icon) => (
+                      <SelectItem key={icon} value={icon} className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <IconComponent name={icon} />
+                          <span>{icon}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button
@@ -188,14 +256,20 @@ const CategoriesManagement = () => {
         )}
 
         <div className="rounded-md border">
-          <div className="grid grid-cols-3 font-medium p-3 border-b bg-gray-50">
+          <div className="grid grid-cols-4 font-medium p-3 border-b bg-gray-50">
+            <div>Icona</div>
             <div>Nome Categoria</div>
             <div>Numero Attività</div>
             <div className="text-right">Azioni</div>
           </div>
           <div className="divide-y">
             {categories.map((category) => (
-              <div key={category.id} className="grid grid-cols-3 p-3 items-center">
+              <div key={category.id} className="grid grid-cols-4 p-3 items-center">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                    <IconComponent name={category.icon || "Store"} />
+                  </div>
+                </div>
                 <div>{category.name}</div>
                 <div>{category.count}</div>
                 <div className="flex justify-end gap-2">
