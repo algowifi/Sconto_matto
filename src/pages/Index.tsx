@@ -160,7 +160,7 @@ const Index = () => {
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="col-span-1">
                   <Label htmlFor="search">Cerca</Label>
                   <Input 
                     type="search" 
@@ -170,28 +170,27 @@ const Index = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                
-              </div>
-              <div>
-                <Accordion type="multiple" collapsible>
-                  <AccordionItem value="categories">
-                    <AccordionTrigger>Categorie</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {availableCategories.map(category => (
-                          <div key={category} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={category}
-                              checked={selectedCategories.includes(category)}
-                              onCheckedChange={() => handleCategoryChange(category)}
-                            />
-                            <Label htmlFor={category}>{category}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <div className="col-span-1">
+                  <Accordion type="multiple" collapsible>
+                    <AccordionItem value="categories">
+                      <AccordionTrigger>Categorie</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {availableCategories.map(category => (
+                            <div key={category} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={category}
+                                checked={selectedCategories.includes(category)}
+                                onCheckedChange={() => handleCategoryChange(category)}
+                              />
+                              <Label htmlFor={category}>{category}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
               </div>
             </CardContent>
           </Card>
