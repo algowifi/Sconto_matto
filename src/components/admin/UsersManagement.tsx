@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Edit2, UserX, UserPlus } from "lucide-react";
+import { Edit2, UserX, UserPlus, Trash2 } from "lucide-react";
 import { User, getUsers, saveUsers } from "@/data/users";
 
 const UsersManagement = () => {
@@ -83,6 +83,16 @@ const UsersManagement = () => {
     toast({
       title: user?.isActive ? "Utente attivato" : "Utente disattivato",
       description: `L'utente ${user?.username} è stato ${user?.isActive ? "attivato" : "disattivato"}`,
+    });
+  };
+
+  const handleDeleteUser = (id: string) => {
+    const updatedUsers = users.filter((user) => user.id !== id);
+    handleSaveUsers(updatedUsers);
+
+    toast({
+      title: "Utente eliminato",
+      description: "L'utente è stato eliminato con successo",
     });
   };
 
@@ -249,6 +259,13 @@ const UsersManagement = () => {
                     onClick={() => handleToggleStatus(user.id)}
                   >
                     <UserX className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDeleteUser(user.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
