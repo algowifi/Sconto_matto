@@ -236,7 +236,8 @@ const Index = () => {
               </CardContent>
               <CardFooter className="flex justify-between items-center">
                 <Button 
-                  variant="outline"
+                  variant={isBusinessSelected(business.id) ? 'destructive' : 'primary'}
+                  className={isBusinessSelected(business.id) ? '' : 'bg-green-500 hover:bg-green-700 text-white'}
                   onClick={() => handleBusinessSelection(business.id)}
                 >
                   {isBusinessSelected(business.id) ? 'Rimuovi' : 'Attiva'}
