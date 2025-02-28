@@ -1,3 +1,6 @@
+
+import { createUser as dbCreateUser, getUsers as dbGetUsers, saveUsers as dbSaveUsers, getUserSelectedBusinesses as dbGetUserSelectedBusinesses, saveUserSelectedBusinesses as dbSaveUserSelectedBusinesses, getAdminUsers as dbGetAdminUsers, saveAdminUsers as dbSaveAdminUsers, verifyAdminCredentials as dbVerifyAdminCredentials, verifyUserCredentials as dbVerifyUserCredentials, updateAdminLastLogin as dbUpdateAdminLastLogin } from './database';
+
 export interface User {
   id: string;
   username: string;
@@ -59,71 +62,43 @@ export const mockAdminUsers: AdminUser[] = [
 ];
 
 // Funzioni di utilità per il salvataggio e il recupero dei dati
-export const getUsers = (): User[] => {
-  const savedUsers = localStorage.getItem("users");
-  if (savedUsers) {
-    return JSON.parse(savedUsers);
-  }
-  localStorage.setItem("users", JSON.stringify(mockUsers));
-  return mockUsers;
+export const getUsers = async (): Promise<User[]> => {
+  return await dbGetUsers();
 };
 
-export const saveUsers = (users: User[]): void => {
-  localStorage.setItem("users", JSON.stringify(users));
+export const saveUsers = async (users: User[]): Promise<void> => {
+  await dbSaveUsers(users);
 };
 
-export const getAdminUsers = (): AdminUser[] => {
-  const savedAdminUsers = localStorage.getItem("admin_users_data");
-  if (savedAdminUsers) {
-    return JSON.parse(savedAdminUsers);
-  }
-  localStorage.setItem("admin_users_data", JSON.stringify(mockAdminUsers));
-  return mockAdminUsers;
+export const getAdminUsers = async (): Promise<AdminUser[]> => {
+  return await dbGetAdminUsers();
 };
 
-export const saveAdminUsers = (users: AdminUser[]): void => {
-  localStorage.setItem("admin_users_data", JSON.stringify(users));
+export const saveAdminUsers = async (users: AdminUser[]): Promise<void> => {
+  await dbSaveAdminUsers(users);
 };
 
-export const verifyAdminCredentials = (username: string, password: string): boolean => {
-  const adminUsers = getAdminUsers();
-  return adminUsers.some(user => 
-    user.username === username && 
-    user.password === password && 
-    user.isActive
-  );
+export const verifyAdminCredentials = async (username: string, password: string): Promise<boolean> => {
+  return await dbVerifyAdminCredentials(username, password);
 };
 
-export const verifyUserCredentials = (email: string, password: string): User | null => {
-  // In un'implementazione reale, verificheremmo la password in modo sicuro
-  // Per questa demo, accettiamo qualsiasi password per gli utenti esistenti
-  const users = getUsers();
-  const user = users.find(user => user.email === email && user.isActive);
-  return user || null;
+export const verifyUserCredentials = async (email: string, password: string): Promise<User | null> => {
+  return await dbVerifyUserCredentials(email, password);
 };
 
-export const updateAdminLastLogin = (username: string): void => {
-  const adminUsers = getAdminUsers();
-  const updatedUsers = adminUsers.map(user => 
-    user.username === username 
-      ? { ...user, lastLogin: new Date().toISOString() } 
-      : user
-  );
-  saveAdminUsers(updatedUsers);
+export const updateAdminLastLogin = async (username: string): Promise<void> => {
+  await dbUpdateAdminLastLogin(username);
 };
 
-export const saveUserSelectedBusinesses = (email: string, selectedBusinessIds: string[]): void => {
-  const users = getUsers();
-  const updatedUsers = users.map(user => 
-    user.email === email 
-      ? { ...user, selectedBusinessIds } 
-      : user
-  );
-  saveUsers(updatedUsers);
+export const saveUserSelectedBusinesses = async (email: string, selectedBusinessIds: string[]): Promise<void> => {
+  await dbSaveUserSelectedBusinesses(email, selectedBusinessIds);
 };
 
-export const getUserSelectedBusinesses = (email: string): string[] => {
-  const users = getUsers();
-  const user = users.find(user => user.email === email);
-  return user?.selectedBusinessIds || [];
+export const getUserSelectedBusinesses = async (email: string): Promise<string[]> => {
+  return await dbGetUserSelectedBusinesses(email);
+};
+
+// Funzione per creare un nuovo utente
+export const createUser = async (userData: { username: string; email: string; plan: string }): Promise<User> => {
+  return await dbCreateUser(userData);
 };
