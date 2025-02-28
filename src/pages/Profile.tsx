@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { businesses } from '@/data/businesses';
-import { getUserSelectedBusinesses } from '@/data/users';
+import { getUserSelectedBusinesses, saveUserSelectedBusinesses } from '@/data/users';
 import { Business } from "@/types/business";
 import { LogOut, CreditCard, ArrowRight, Percent, Trash } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ const Profile = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("");
   const [planLimit, setPlanLimit] = useState<number>(0);
   const [selectedBusinesses, setSelectedBusinesses] = useState<Business[]>([]);
+  const [selectedBusinessIds, setSelectedBusinessIds] = useState<string[]>([]);
   const [totalSavings, setTotalSavings] = useState<number>(0);
 
   useEffect(() => {
@@ -47,18 +49,21 @@ const Profile = () => {
     }
 
     // Recupera le attività selezionate dall'utente
-    const selectedIds = getUserSelectedBusinesses(email);
-    const selectedBusiness = businesses.filter(business => 
-      selectedIds.includes(business.id)
-    );
-    setSelectedBusinesses(selectedBusiness);
+    const loadSelectedBusinesses = async () => {
+      const selectedIds = await getUserSelectedBusinesses(email);
+      setSelectedBusinessIds(selectedIds);
+      const selectedBusiness = businesses.filter(business => 
+        selectedIds.includes(business.id)
+      );
+      setSelectedBusinesses(selectedBusiness);
 
-    // Calcola il risparmio totale (come esempio)
-    const totalDiscount = selectedBusiness.reduce((total, business) => total + business.discount, 0);
-
-    // Calcola la percentuale di risparmio corretta
-    const percentageSavings = selectedBusinesses.length > 0 ? Math.round(totalDiscount / selectedBusinesses.length) : 0;
-    setTotalSavings(percentageSavings);
+      // Calcola il risparmio totale
+      const totalDiscount = selectedBusiness.reduce((total, business) => total + business.discount, 0);
+      const percentageSavings = selectedBusiness.length > 0 ? Math.round(totalDiscount / selectedBusiness.length) : 0;
+      setTotalSavings(percentageSavings);
+    };
+    
+    loadSelectedBusinesses();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -79,18 +84,25 @@ const Profile = () => {
     navigate('/plans');
   };
 
-  const handleRemoveOffer = (businessId: string) => {
+  const handleRemoveOffer = async (businessId: string) => {
     const email = localStorage.getItem('userEmail');
     if (!email) {
       navigate('/login');
       return;
     }
 
-    const selectedIds = getUserSelectedBusinesses(email);
     // Rimuovi l'attività se è già selezionata
-    const updatedIds = selectedIds.filter(id => id !== businessId);
-    localStorage.setItem(`selectedBusinesses_${email}`, JSON.stringify(updatedIds));
+    const updatedIds = selectedBusinessIds.filter(id => id !== businessId);
+    setSelectedBusinessIds(updatedIds);
+    await saveUserSelectedBusinesses(email, updatedIds);
     setSelectedBusinesses(prev => prev.filter(b => b.id !== businessId));
+    
+    // Aggiorna il risparmio totale
+    const updatedBusinesses = selectedBusinesses.filter(b => b.id !== businessId);
+    const totalDiscount = updatedBusinesses.reduce((total, business) => total + business.discount, 0);
+    const percentageSavings = updatedBusinesses.length > 0 ? Math.round(totalDiscount / updatedBusinesses.length) : 0;
+    setTotalSavings(percentageSavings);
+    
     toast.success('Offerta rimossa con successo!');
   };
 

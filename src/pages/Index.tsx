@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ const Index = () => {
   const [discountRange, setDiscountRange] = useState<number[]>([10, 20]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBusinesses, setSelectedBusinesses] = useState<Business[]>([]);
+  const [selectedBusinessIds, setSelectedBusinessIds] = useState<string[]>([]);
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
   const [planLimit, setPlanLimit] = useState<number>(0);
@@ -50,11 +52,19 @@ const Index = () => {
     setUserName(name || "");
     setPlanLimit(Number(limit) || 0);
 
-    const selectedIds = getUserSelectedBusinesses(email);
-    const selectedBusiness = businesses.filter(business => 
-      selectedIds.includes(business.id)
-    );
-    setSelectedBusinesses(selectedBusiness);
+    // Load selected businesses
+    const loadSelectedBusinesses = async () => {
+      if (email) {
+        const selectedIds = await getUserSelectedBusinesses(email);
+        setSelectedBusinessIds(selectedIds);
+        const selectedBusiness = businesses.filter(business => 
+          selectedIds.includes(business.id)
+        );
+        setSelectedBusinesses(selectedBusiness);
+      }
+    };
+
+    loadSelectedBusinesses();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -88,17 +98,19 @@ const Index = () => {
     });
   };
 
-  const handleBusinessSelection = (businessId: string) => {
+  const handleBusinessSelection = async (businessId: string) => {
     const email = localStorage.getItem('userEmail');
     if (!email) {
       navigate('/login');
       return;
     }
 
-    const selectedIds = getUserSelectedBusinesses(email);
-    if (selectedIds.includes(businessId)) {
+    // Get current selected businesses
+    if (selectedBusinessIds.includes(businessId)) {
       // Rimuovi l'attività se è già selezionata
-      saveUserSelectedBusinesses(email, selectedIds.filter(id => id !== businessId));
+      const updatedIds = selectedBusinessIds.filter(id => id !== businessId);
+      setSelectedBusinessIds(updatedIds);
+      await saveUserSelectedBusinesses(email, updatedIds);
       setSelectedBusinesses(prev => prev.filter(b => b.id !== businessId));
       toast({
         title: "Offerta rimossa!",
@@ -113,7 +125,9 @@ const Index = () => {
         return;
       }
       // Aggiungi l'attività se non è selezionata
-      saveUserSelectedBusinesses(email, [...selectedIds, businessId]);
+      const updatedIds = [...selectedBusinessIds, businessId];
+      setSelectedBusinessIds(updatedIds);
+      await saveUserSelectedBusinesses(email, updatedIds);
       setSelectedBusinesses(prev => [...prev, businesses.find(b => b.id === businessId)!]);
       toast({
         title: "Offerta aggiunta!",
@@ -123,12 +137,7 @@ const Index = () => {
   };
 
   const isBusinessSelected = (businessId: string) => {
-    const email = localStorage.getItem('userEmail');
-    if (!email) {
-      return false;
-    }
-    const selectedIds = getUserSelectedBusinesses(email);
-    return selectedIds.includes(businessId);
+    return selectedBusinessIds.includes(businessId);
   };
 
   const handleViewProfile = () => {
@@ -179,7 +188,7 @@ const Index = () => {
                   />
                 </div>
                 <div className="col-span-1">
-                  <Accordion type="multiple" collapsible>
+                  <Accordion type="multiple">
                     <AccordionItem value="categories">
                       <AccordionTrigger>Categorie</AccordionTrigger>
                       <AccordionContent>

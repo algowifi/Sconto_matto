@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,15 +23,20 @@ const UsersManagement = () => {
 
   useEffect(() => {
     // Carica i dati degli utenti dal modulo data/users.ts
-    setUsers(getUsers());
+    const fetchUsers = async () => {
+      const usersList = await getUsers();
+      setUsers(usersList);
+    };
+    
+    fetchUsers();
   }, []);
 
-  const handleSaveUsers = (updatedUsers: User[]) => {
+  const handleSaveUsers = async (updatedUsers: User[]) => {
     setUsers(updatedUsers);
-    saveUsers(updatedUsers);
+    await saveUsers(updatedUsers);
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     const id = Date.now().toString();
     const newUserComplete: User = {
       ...newUser,
@@ -39,7 +45,7 @@ const UsersManagement = () => {
     };
     
     const updatedUsers = [...users, newUserComplete];
-    handleSaveUsers(updatedUsers);
+    await handleSaveUsers(updatedUsers);
     
     setIsAdding(false);
     setNewUser({
@@ -55,14 +61,14 @@ const UsersManagement = () => {
     });
   };
 
-  const handleUpdateUser = () => {
+  const handleUpdateUser = async () => {
     if (!editingUser) return;
     
     const updatedUsers = users.map((user) =>
       user.id === editingUser.id ? editingUser : user
     );
     
-    handleSaveUsers(updatedUsers);
+    await handleSaveUsers(updatedUsers);
     setEditingUser(null);
     
     toast({
@@ -71,12 +77,12 @@ const UsersManagement = () => {
     });
   };
 
-  const handleToggleStatus = (id: string) => {
+  const handleToggleStatus = async (id: string) => {
     const updatedUsers = users.map((user) =>
       user.id === id ? { ...user, isActive: !user.isActive } : user
     );
     
-    handleSaveUsers(updatedUsers);
+    await handleSaveUsers(updatedUsers);
     
     const user = updatedUsers.find((u) => u.id === id);
     
@@ -86,9 +92,9 @@ const UsersManagement = () => {
     });
   };
 
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
     const updatedUsers = users.filter((user) => user.id !== id);
-    handleSaveUsers(updatedUsers);
+    await handleSaveUsers(updatedUsers);
 
     toast({
       title: "Utente eliminato",

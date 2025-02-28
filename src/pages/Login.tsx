@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { verifyUserCredentials, mockUsers } from "@/data/users"; // Importiamo anche i mockUsers
+import { verifyUserCredentials, createUser } from "@/data/users"; // Updated import
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ const Login = () => {
 
     try {
       // Verifica delle credenziali dell'utente
-      const user = verifyUserCredentials(email, password);
+      const user = await verifyUserCredentials(email, password);
 
       if (user) {
         // Imposta il flag di autenticazione e i dati dell'utente
@@ -62,11 +63,7 @@ const Login = () => {
     }
   };
 
-  const handleRegister = () => {
-    // In una applicazione reale, reindirizzare a una pagina di registrazione
-    // Per questa demo, registriamo l'utente con il piano Base
-    const emailExists = mockUsers.some(user => user.email === email);
-    
+  const handleRegister = async () => {
     if (!email.includes('@')) {
       toast({
         title: "Email non valida",
@@ -76,44 +73,42 @@ const Login = () => {
       return;
     }
     
-    if (emailExists) {
-      toast({
-        title: "Email già registrata",
-        description: "Questa email è già associata a un account.",
-        variant: "destructive",
+    try {
+      // Utilizza il metodo createUser dal database
+      const newUser = await createUser({
+        username: email.split('@')[0],
+        email: email,
+        plan: "Base"
       });
-      return;
+      
+      // Autenticazione automatica
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("userEmail", email);
+      localStorage.setItem("userName", newUser.username);
+      localStorage.setItem("selectedPlan", "base");
+      localStorage.setItem("selectedPlanLimit", "5");
+      
+      toast({
+        title: "Registrazione completata",
+        description: `Benvenuto, ${newUser.username}!`,
+      });
+      
+      navigate("/plans");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: "Errore nella registrazione",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Errore",
+          description: "Si è verificato un errore durante la registrazione.",
+          variant: "destructive",
+        });
+      }
     }
-    
-    // Simula una registrazione (in un'app reale, salveremmo nel database)
-    const newUser = {
-      id: (mockUsers.length + 1).toString(),
-      username: email.split('@')[0],
-      email: email,
-      plan: "Base",
-      isActive: true,
-      registeredDate: new Date().toISOString().split('T')[0],
-      selectedBusinessIds: []
-    };
-    
-    // Aggiungiamo l'utente all'array mockUsers in localStorage
-    const users = JSON.parse(localStorage.getItem("users") || JSON.stringify(mockUsers));
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    
-    // Autenticazione automatica
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("userEmail", email);
-    localStorage.setItem("userName", newUser.username);
-    localStorage.setItem("selectedPlan", "base");
-    localStorage.setItem("selectedPlanLimit", "5");
-    
-    toast({
-      title: "Registrazione completata",
-      description: `Benvenuto, ${newUser.username}!`,
-    });
-    
-    navigate("/plans");
   };
 
   return (
